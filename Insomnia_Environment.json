@@ -1,0 +1,4 @@
+{
+  "azureUrl": "http://localhost:8080/azure",
+  "containerName": "recordings"
+}
