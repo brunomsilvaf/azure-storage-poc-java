@@ -9,6 +9,7 @@ public interface AzureStorageConfiguration {
 
     AuthenticationTypes authenticationType();
     String storageAccountName();
+    Long expirationMinutes();
 
     // SAS token: Storage account -> shared access signature
     // Shared key credential & connection string: Storage account -> access keys

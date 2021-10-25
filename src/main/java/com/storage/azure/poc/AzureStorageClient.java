@@ -6,10 +6,14 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.models.UserDelegationKey;
+import com.azure.storage.blob.sas.BlobSasPermission;
+import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import com.azure.storage.common.StorageSharedKeyCredential;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.time.OffsetDateTime;
 
 @ApplicationScoped
 public class AzureStorageClient {
@@ -65,6 +69,23 @@ public class AzureStorageClient {
     public BlobClient getBlobClient() {
         // can also use BlobClientBuilder
         return getBlobContainerClient().getBlobClient(azureConfiguration.blobName().orElseThrow());
+    }
+
+    public String generateSasToken(BlobServiceClient blobServiceClient, BlobClient blobClient) {
+
+        // get a user delegation key with some expiry date
+        UserDelegationKey userDelegationKey =
+            blobServiceClient.getUserDelegationKey(OffsetDateTime.now(), OffsetDateTime.now().plusMinutes(10));
+
+        // define permissions and link expiry date
+        BlobSasPermission blobSasPermission =  new BlobSasPermission().setReadPermission(true);
+        OffsetDateTime expiryTime = OffsetDateTime.now().plusMinutes(azureConfiguration.expirationMinutes());
+        BlobServiceSasSignatureValues serviceSasValues = new BlobServiceSasSignatureValues(expiryTime, blobSasPermission);
+
+        // get the token and invalidate the user delegation key
+        String sasToken = blobClient.generateUserDelegationSas(serviceSasValues, userDelegationKey);
+        userDelegationKey.setSignedExpiry(OffsetDateTime.now());
+        return blobClient.getBlobUrl() + "?" + sasToken;
     }
 
 }

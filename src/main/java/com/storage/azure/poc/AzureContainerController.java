@@ -3,9 +3,6 @@ package com.storage.azure.poc;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
-import com.azure.storage.blob.models.UserDelegationKey;
-import com.azure.storage.blob.sas.BlobSasPermission;
-import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 
 import javax.inject.Inject;
 import javax.ws.rs.DELETE;
@@ -19,7 +16,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.time.OffsetDateTime;
 import java.util.stream.Collectors;
 
 // Regarding container name:
@@ -107,15 +103,7 @@ public class AzureContainerController {
         BlobContainerClient blobContainerClient = blobServiceClient.getBlobContainerClient(containerName);
         BlobClient blobClient = blobContainerClient.getBlobClient(blobName);
 
-        UserDelegationKey userDelegationKey = blobServiceClient.getUserDelegationKey(OffsetDateTime.now(), OffsetDateTime.now().plusMinutes(1));
-
-        BlobSasPermission blobSasPermission =  new BlobSasPermission().setReadPermission(true);
-        OffsetDateTime expiryTime = OffsetDateTime.now().plusMinutes(1);
-        BlobServiceSasSignatureValues serviceSasValues = new BlobServiceSasSignatureValues(expiryTime, blobSasPermission);
-
-        String sasToken = blobClient.generateUserDelegationSas(serviceSasValues, userDelegationKey);
-
-        return blobClient.getBlobUrl() + "?" + sasToken;
+        return azureStorageClient.generateSasToken(blobServiceClient, blobClient);
     }
 
     @POST
