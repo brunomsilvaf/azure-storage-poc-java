@@ -150,7 +150,7 @@ public class AzureContainerController {
     @DELETE
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/{containerName}/blob/{blobName}")
-    public void uploadDataToBlob(
+    public void deleteBlob(
         @PathParam("containerName") String containerName,
         @PathParam("blobName") String blobName) {
 
