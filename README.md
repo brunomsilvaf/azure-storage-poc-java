@@ -1,4 +1,4 @@
-# azure-storage-poc-java Project
+# azure-storage-poc-java
 
 A simple project to investigate the integration with Azure Storage.
 
